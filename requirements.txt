@@ -1,0 +1,10 @@
+Flask
+pandas
+joblib==1.5.3
+scikit-learn
+imbalanced-learn
+google-generativeai
+python-dotenv
+gunicorn
+xgboost
+numpy

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Analysis Result - Stroke Prediction</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .result-container {
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 50px 40px;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .result-header h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+        }
+
+        .result-header p {
+            color: #6b7280;
+            font-size: 15px;
+        }
+
+        .risk-display {
+            text-align: center;
+            padding: 40px 30px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .risk-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.1;
+            background: radial-gradient(circle at center, currentColor 0%, transparent 70%);
+        }
+
+        .risk-high {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+        }
+
+        .risk-moderate {
+            background: linear-gradient(135deg, #ffd93d 0%, #f9ca24 100%);
+            color: #1a1a2e;
+        }
+
+        .risk-low {
+            background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+            color: white;
+        }
+
+        .risk-icon {
+            font-size: 72px;
+            margin-bottom: 20px;
+            display: inline-block;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .risk-label {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .risk-probability {
+            font-size: 20px;
+            font-weight: 400;
+            margin-bottom: 10px;
+        }
+
+        .probability-number {
+            font-size: 56px;
+            font-weight: 700;
+            display: block;
+            margin: 15px 0;
+            line-height: 1;
+        }
+
+        .probability-label {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            opacity: 0.9;
+        }
+
+        .info-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .info-section h4 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a2e;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .info-section h4::before {
+            content: '💡';
+            margin-right: 10px;
+            font-size: 22px;
+        }
+
+        .info-section ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .info-section li {
+            padding: 8px 0;
+            color: #4b5563;
+            font-size: 14px;
+            line-height: 1.6;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .info-section li::before {
+            content: '•';
+            position: absolute;
+            left: 10px;
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        .disclaimer {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .disclaimer-icon {
+            font-size: 20px;
+            margin-right: 10px;
+        }
+
+        .disclaimer-text {
+            font-size: 13px;
+            color: #856404;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn-custom {
+            padding: 14px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 12px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+            color: white;
+        }
+
+        .btn-secondary-custom {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary-custom:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .progress-ring {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 20px;
+        }
+
+        @media (max-width: 576px) {
+            .result-card {
+                padding: 35px 25px;
+            }
+
+            .result-header h2 {
+                font-size: 24px;
+            }
+
+            .risk-label {
+                font-size: 26px;
+            }
+
+            .probability-number {
+                font-size: 48px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn-custom {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="result-container">
+        <div class="result-card">
+            <div class="result-header">
+                <h2>🧠 AI Analysis Complete</h2>
+                <p>Stroke Risk Assessment Results</p>
+            </div>
+
+            {% if prob >= 75 %}
+                <div class="risk-display risk-high">
+                    <div class="risk-icon">⚠️</div>
+                    <div class="risk-label">HIGH RISK</div>
+                    <div class="probability-number">{{ prob }}%</div>
+                    <div class="probability-label">Stroke Probability</div>
+                </div>
+
+                <div class="info-section">
+                    <h4>Recommended Actions</h4>
+                    <ul>
+                        <li>Consult a healthcare professional immediately</li>
+                        <li>Schedule a comprehensive medical evaluation</li>
+                        <li>Discuss preventive measures with your doctor</li>
+                        <li>Monitor blood pressure and cholesterol levels</li>
+                    </ul>
+                </div>
+
+            {% elif prob > 45 and prob < 75 %}
+                <div class="risk-display risk-moderate">
+                    <div class="risk-icon">⚡</div>
+                    <div class="risk-label">MODERATE RISK</div>
+                    <div class="probability-number">{{ prob }}%</div>
+                    <div class="probability-label">Stroke Probability</div>
+                </div>
+
+                <div class="info-section">
+                    <h4>Recommended Actions</h4>
+                    <ul>
+                        <li>Schedule a medical consultation soon</li>
+                        <li>Adopt a healthier lifestyle (diet & exercise)</li>
+                        <li>Monitor cardiovascular health regularly</li>
+                        <li>Reduce risk factors like smoking and stress</li>
+                    </ul>
+                </div>
+
+            {% else %}
+                <div class="risk-display risk-low">
+                    <div class="risk-icon">✅</div>
+                    <div class="risk-label">LOW RISK</div>
+                    <div class="probability-number">{{ prob }}%</div>
+                    <div class="probability-label">Stroke Probability</div>
+                </div>
+
+                <div class="info-section">
+                    <h4>Recommended Actions</h4>
+                    <ul>
+                        <li>Maintain your current healthy lifestyle</li>
+                        <li>Continue regular health check-ups</li>
+                        <li>Stay physically active and eat well</li>
+                        <li>Monitor health parameters periodically</li>
+                    </ul>
+                </div>
+            {% endif %}
+
+            <div class="disclaimer">
+                <p class="disclaimer-text">
+                    <span class="disclaimer-icon">⚕️</span>
+                    <strong>Important Disclaimer:</strong> This is an AI-powered prediction tool designed for educational and informational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. Always consult with qualified healthcare providers regarding any medical concerns or before making health-related decisions.
+                </p>
+            </div>
+
+            <div class="action-buttons">
+                <a href="/" class="btn-custom btn-primary-custom">
+                    <span>🔄</span> New Analysis
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
